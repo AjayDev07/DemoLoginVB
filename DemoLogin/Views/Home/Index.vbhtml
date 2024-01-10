@@ -37,8 +37,7 @@ End Code
 
         <br> <br> <hr>
 
-
-        <button type="button" class="btn btn-primary" data-toggle="modal" style="width: 120px !important; max-width: 120px !important;" data-target="#addPersonModal">Add Person</button>
+        <button type="button" class="btn btn-primary" style="width: 120px !important; max-width: 120px !important;" onclick="$('#addPersonModal').modal('show');" >Add Person</button>
         <br><br>
 
         <h2>Teachers</h2>
@@ -183,7 +182,7 @@ End Code
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="$('#addPersonModal').modal('hide');">Cancel</button>
                 <button type="button" class="btn btn-warning" onclick="resetForm()">Reset</button>
                 <button type="button" class="btn btn-primary" onclick="submitFormToServer()">Submit</button>
             </div>
@@ -206,7 +205,7 @@ End Code
                 Are you sure you want to delete this person?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="$('#deleteConfirmationModal').modal('hide');">Cancel</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
             </div>
         </div>
@@ -275,6 +274,7 @@ End Code
                         resetForm();
 
                         $('#addPersonModal').modal('hide');
+                        location.reload();
 
                         console.log("Success! Hiding modal.");
 
