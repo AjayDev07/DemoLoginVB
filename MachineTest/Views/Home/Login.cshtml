@@ -1,0 +1,35 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<label>Email</label>
+<input type="email" id="email" />
+
+<label>Password</label>
+<input type="password" id="pass" />
+
+<button type="button" id="btnLogin">Login</button>
+
+<script>
+    $("#btnLogin").click(function () {
+        var email = $("#email").val();
+        $.ajax({
+            type: "POST",
+            url: 'Home/Login',
+            data: { email : email},
+            dataType: "JSON" ,           
+            success: function (data) {
+                debugger
+                window.location.href = "@Url.Action("Dashboard", "Home")";
+            },
+            error: function () {
+                alert("Error while inserting data");
+            }
+        });
+
+    });
+
+
+</script>
