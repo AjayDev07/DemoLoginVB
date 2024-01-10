@@ -247,6 +247,7 @@ End Code
     }
 </script>
 
+
 <script>
         function resetForm() {
             document.getElementById("addPersonForm").reset();

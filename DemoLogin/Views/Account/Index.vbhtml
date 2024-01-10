@@ -2,6 +2,11 @@
 
 <h2>Login</h2>
 
+@*@ if (ViewBag.InvalidCredentials IsNot Nothing AndAlso ViewBag.InvalidCredentials) {
+    <div class="alert alert-danger">
+    Invalid username or password. Please try again.
+    </div>
+    }*@
 
 @Using Html.BeginForm("Login", "Account", FormMethod.Post, New With {.onsubmit = "return validateForm()"})
     @<div>

@@ -106,7 +106,6 @@ Namespace Controllers
 
                         command.Parameters.AddWithValue("@Email", personId)
 
-
                         command.ExecuteNonQuery()
                     End Using
                 End Using
