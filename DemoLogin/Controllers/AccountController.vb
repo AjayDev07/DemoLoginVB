@@ -56,14 +56,12 @@ Namespace Controllers
         <HttpPost>
         Function AddPerson(model As Users) As ActionResult
             If ModelState.IsValid Then
-                ' Save the person data to the database
+
                 SavePersonToDatabase(model)
 
-                ' Optionally, redirect to another page or return a success message
                 Return Json(New With {.success = True})
             End If
 
-            ' If the model is not valid, return an error response
             Return Json(New With {.success = False, .errors = ModelState.Values.SelectMany(Function(v) v.Errors.Select(Function(e) e.ErrorMessage))})
         End Function
 
@@ -78,7 +76,6 @@ Namespace Controllers
                     Dim query As String = "INSERT INTO Users (FirstName, LastName, Email, Gender, Hobbies, PersonType) VALUES (@FirstName, @LastName, @Email, @Gender, @Hobbies, @PersonType)"
 
                     Using command As New SqlCommand(query, connection)
-                        ' Add parameters
                         command.Parameters.AddWithValue("@FirstName", model.FirstName)
                         command.Parameters.AddWithValue("@LastName", model.LastName)
                         command.Parameters.AddWithValue("@Email", model.Email)
@@ -86,15 +83,41 @@ Namespace Controllers
                         command.Parameters.AddWithValue("@Hobbies", String.Join(",", model.Hobbies))
                         command.Parameters.AddWithValue("@PersonType", model.PersonType)
 
-                        ' Execute the query
                         command.ExecuteNonQuery()
                     End Using
                 End Using
             Catch ex As Exception
-                ' Handle exceptions (log or show an error message)
-                ' For simplicity, you can log the exception or display an error message to the user
+
                 ModelState.AddModelError("", "Error saving data to the database.")
             End Try
         End Sub
+
+        <HttpPost>
+        Function DeletePerson(personId As String) As ActionResult
+            Try
+                Dim connectionString As String = ConfigurationManager.ConnectionStrings("DefaultConnection").ConnectionString
+
+                Using connection As New SqlConnection(connectionString)
+                    connection.Open()
+
+                    Dim query As String = "DELETE FROM Users WHERE Email = @Email"
+
+                    Using command As New SqlCommand(query, connection)
+
+                        command.Parameters.AddWithValue("@Email", personId)
+
+
+                        command.ExecuteNonQuery()
+                    End Using
+                End Using
+
+                Return Json(New With {.success = True})
+
+            Catch ex As Exception
+                Return Json(New With {.success = False, .error = "Error deleting data from the database."})
+            End Try
+        End Function
+
+
     End Class
 End Namespace

@@ -17,7 +17,7 @@ End Code
     <section class="row align-items-center" aria-labelledby="aspnetTitle">
         <style>
             .column {
-                margin-bottom: 30px; /* Adjust the margin as needed */
+                margin-bottom: 30px;
             }
         </style>
 
@@ -35,11 +35,11 @@ End Code
             </div>
         </div>
 
+        <br> <br> <hr>
+
+
         <button type="button" class="btn btn-primary" data-toggle="modal" style="width: 120px !important; max-width: 120px !important;" data-target="#addPersonModal">Add Person</button>
-
-
-
-        <br />
+        <br><br>
 
         <h2>Teachers</h2>
         <table class="table">
@@ -50,6 +50,7 @@ End Code
                     <th>Email</th>
                     <th>Gender</th>
                     <th>Hobbies</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,6 +62,9 @@ End Code
                             <td>@teacher.Email</td>
                             <td>@teacher.Gender</td>
                             <td>@teacher.Hobbies</td>
+                            <td>
+                                <button class="btn btn-danger" onclick="deleteRowConfirmation('@teacher.Email')">Delete</button>
+                            </td>
                         </tr>
                     Next
                 End If
@@ -76,6 +80,7 @@ End Code
                     <th>Email</th>
                     <th>Gender</th>
                     <th>Hobbies</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,16 +92,18 @@ End Code
                             <td>@student.Email</td>
                             <td>@student.Gender</td>
                             <td>@student.Hobbies</td>
+                            <td>
+                                <button class="btn btn-danger" onclick="deleteRowConfirmation('@student.Email')">Delete</button>
+                            </td>
                         </tr>
                     Next
                 End If
             </tbody>
         </table>
-
     </section>
 </main>
 
-<!-- Add Person Modal -->
+
 <div class="modal fade" id="addPersonModal" tabindex="-1" role="dialog" aria-labelledby="addPersonModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -107,11 +114,14 @@ End Code
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Form fields for the person -->
+                
                 <form id="addPersonForm">
                     <div class="form-group">
                         <label for="firstName">First Name:</label>
                         <input type="text" class="form-control" id="firstName" name="firstName" required>
+                        <div class="invalid-feedback">
+                            Please enter a valid first name.
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name:</label>
@@ -120,6 +130,9 @@ End Code
                     <div class="form-group">
                         <label for="email">Email:</label>
                         <input type="text" class="form-control" id="email" name="email" required>
+                        <div class="invalid-feedback">
+                            Please enter a valid email address.
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Gender:</label>
@@ -162,6 +175,7 @@ End Code
                     <div class="form-group">
                         <label for="personType">Person Type:</label>
                         <select class="form-control" id="personType" name="personType" required>
+                            <option value="" disabled selected>Select</option>
                             <option value="Teacher">Teacher</option>
                             <option value="Student">Student</option>
                         </select>
@@ -179,39 +193,51 @@ End Code
 
 
 
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Delete Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this person?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
-    function resetForm() {
-        document.getElementById("addPersonForm").reset();
+    var personToDeleteId;
+
+    function deleteRowConfirmation(personId) {
+        personToDeleteId = personId;
+        $('#deleteConfirmationModal').modal('show');
     }
 
-    function submitFormToServer() {
-        var formData = {
-            firstName: $('#firstName').val(),
-            lastName: $('#lastName').val(),
-            email: $('#email').val(),
-            gender: $('input[name="gender"]:checked').val(),
-            hobbies: $('input[name="hobbies"]:checked').map(function () {
-                return this.value;
-            }).get().join(','),
-            personType: $('#personType').val()
-        };
+    $('#confirmDeleteButton').on('click', function () {
+        deletePerson(personToDeleteId);
+        $('#deleteConfirmationModal').modal('hide');
+    });
 
+    function deletePerson(personId) {
         $.ajax({
             type: 'POST',
-            url: '/Account/AddPerson',
-            data: formData,
+            url: '/Account/DeletePerson',
+            data: { personId: personId },
             success: function (response) {
-
                 if (response.success) {
-                    resetForm();
-
-                    $('#addPersonModal').modal('hide');
-
-                    console.log("Success! Hiding modal.");
-
+                    
+                    location.reload();
                 } else {
-
-                    console.log(response.errors);
+                    console.log(response.error);
                 }
             },
             error: function (error) {
@@ -221,3 +247,44 @@ End Code
     }
 </script>
 
+<script>
+        function resetForm() {
+            document.getElementById("addPersonForm").reset();
+        }
+
+        function submitFormToServer() {
+            var formData = {
+                firstName: $('#firstName').val(),
+                lastName: $('#lastName').val(),
+                email: $('#email').val(),
+                gender: $('input[name="gender"]:checked').val(),
+                hobbies: $('input[name="hobbies"]:checked').map(function () {
+                    return this.value;
+                }).get().join(','),
+                personType: $('#personType').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/Account/AddPerson',
+                data: formData,
+                success: function (response) {
+
+                    if (response.success) {
+                        resetForm();
+
+                        $('#addPersonModal').modal('hide');
+
+                        console.log("Success! Hiding modal.");
+
+                    } else {
+
+                        console.log(response.errors);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+    </script>

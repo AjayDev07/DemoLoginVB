@@ -4,20 +4,12 @@ Imports Microsoft.VisualBasic.ApplicationServices
 Public Class HomeController
     Inherits System.Web.Mvc.Controller
 
-    'Function Index() As ActionResult
-    '    Return View()
-    'End Function
-
     Function Index() As ActionResult
-        ' Retrieve the connection string from Web.config
+
         Dim connectionString As String = ConfigurationManager.ConnectionStrings("DefaultConnection").ConnectionString
 
-        ' Create a SqlConnection using the connection string
         Using connection As New SqlConnection(connectionString)
-            ' Your code to interact with the database goes here
             connection.Open()
-
-            ' Fetch data for teachers
             Dim teachersData As New List(Of Users)()
             Dim queryTeachers As String = "SELECT * FROM Users WHERE PersonType = @PersonType"
             Using commandTeachers As New SqlCommand(queryTeachers, connection)
@@ -37,7 +29,6 @@ Public Class HomeController
                 End Using
             End Using
 
-            ' Fetch data for students
             Dim studentsData As New List(Of Users)()
             Dim queryStudents As String = "SELECT * FROM Users WHERE PersonType = @PersonType"
             Using commandStudents As New SqlCommand(queryStudents, connection)
@@ -57,7 +48,6 @@ Public Class HomeController
                 End Using
             End Using
 
-            ' Pass the lists of teachers and students to the view
             ViewData("Teachers") = teachersData
             ViewData("Students") = studentsData
         End Using
@@ -76,4 +66,36 @@ Public Class HomeController
 
         Return View()
     End Function
+
+    <HttpPost>
+    Function Login(model As Login) As ActionResult
+        Dim connectionString As String = ConfigurationManager.ConnectionStrings("DefaultConnection").ConnectionString
+
+        Using connection As New SqlConnection(connectionString)
+            connection.Open()
+
+            Dim isValidUser As Boolean = AuthenticateUser(model.UserName, model.Password, connection)
+
+            If isValidUser Then
+                Return RedirectToAction("Index")
+            Else
+                ViewBag.InvalidCredentials = True
+                Return View("Index", model)
+            End If
+        End Using
+    End Function
+
+    Private Function AuthenticateUser(username As String, password As String, connection As SqlConnection) As Boolean
+
+        Dim query As String = "SELECT COUNT(*) FROM Users WHERE UserName = @UserName AND Password = @Password"
+        Using command As New SqlCommand(query, connection)
+            command.Parameters.AddWithValue("@UserName", username)
+            command.Parameters.AddWithValue("@Password", password)
+
+            Dim count As Integer = CInt(command.ExecuteScalar())
+            Return count > 0
+        End Using
+    End Function
+
+
 End Class
